@@ -1812,6 +1812,17 @@ static BOOL window_minimize_unsupported( struct x11drv_win_data *data )
            !is_net_supported( x11drv_atom(_NET_WM_STATE_HIDDEN) );
 }
 
+static BOOL skip_map_window( HWND hwnd )
+{
+    WCHAR class_name[64];
+    UNICODE_STRING class_str = { .Buffer = class_name, .MaximumLength = sizeof(class_name) };
+
+    NtUserGetClassName( hwnd, FALSE, &class_str );
+    return !wcscmp( class_name, u"CoverWindow" ) || !wcscmp( class_name, u"mainBg.xml" )
+        || !wcscmp( class_name, u"CustomInstallWndBg.xml" ) || !wcscmp( class_name, u"MessageBoxBg.xml" );
+
+}
+
 static void window_set_wm_state( struct x11drv_win_data *data, UINT new_state, BOOL activate )
 {
     UINT old_state = data->pending_state.wm_state;
@@ -1935,7 +1946,10 @@ static void window_set_wm_state( struct x11drv_win_data *data, UINT new_state, B
     case MAKELONG(WithdrawnState, NormalState):
     case MAKELONG(IconicState, NormalState):
         if (data->embedded) set_xembed_flags( data, XEMBED_MAPPED );
-        else XMapWindow( data->display, data->whole_window );
+        else if (skip_map_window( data->hwnd ))
+            WARN( "HACK: not mapping overlay window.\n ");
+        else
+            XMapWindow( data->display, data->whole_window);
         break;
     case MAKELONG(NormalState, WithdrawnState):
     case MAKELONG(IconicState, WithdrawnState):
