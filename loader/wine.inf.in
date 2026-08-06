@@ -59,6 +59,7 @@ AddReg=\
     Classes,\
     ContentIndex,\
     ControlClass,\
+    ControlWdf,\
     CurrentVersion,\
     Debugger,\
     DirectX,\
@@ -165,6 +166,7 @@ AddService=Winmgmt,0,WinmgmtService
 AddService=wuauserv,0,wuauService
 AddService=NDIS,0x800,NDISService
 AddService=nsiproxy,0x800,NsiProxyService
+AddService=Wdf01000,0x800,KmdfService
 AddService=SharedGpuResources,0x800,SharedGpuResourcesService
 
 [DefaultInstall.ntx86.Services]
@@ -186,6 +188,7 @@ AddService=Schedule,0,TaskSchedulerService
 AddService=Winmgmt,0,WinmgmtService
 AddService=wuauserv,0,wuauService
 AddService=NDIS,0x800,NDISService
+AddService=Wdf01000,0x800,KmdfService
 AddService=nsiproxy,0x800,NsiProxyService
 AddService=SharedGpuResources,0x800,SharedGpuResourcesService
 
@@ -207,6 +210,7 @@ AddService=FontCache,0,FontCacheService
 AddService=Schedule,0,TaskSchedulerService
 AddService=Winmgmt,0,WinmgmtService
 AddService=wuauserv,0,wuauService
+AddService=Wdf01000,0x800,KmdfService
 AddService=NDIS,0x800,NDISService
 AddService=nsiproxy,0x800,NsiProxyService
 AddService=SharedGpuResources,0x800,SharedGpuResourcesService
@@ -228,6 +232,7 @@ AddService=LanmanServer,0,LanmanServerService
 AddService=FontCache,0,FontCacheService
 AddService=Schedule,0,TaskSchedulerService
 AddService=Winmgmt,0,WinmgmtService
+AddService=Wdf01000,0x800,KmdfService
 AddService=wuauserv,0,wuauService
 AddService=NDIS,0x800,NDISService
 AddService=nsiproxy,0x800,NsiProxyService
@@ -344,6 +349,9 @@ HKLM,System\CurrentControlSet\Control\Class\{6bdd1fc6-810f-11d0-bec7-08002be2092
 HKLM,System\CurrentControlSet\Control\Class\{6bdd1fc6-810f-11d0-bec7-08002be2092f},"Class",,"Image"
 HKLM,System\CurrentControlSet\Control\Class\{745a17a0-74d3-11d0-b6fe-00a0c90f57da},,,"Human Interface Devices"
 HKLM,System\CurrentControlSet\Control\Class\{745a17a0-74d3-11d0-b6fe-00a0c90f57da},"Class",,"HIDClass"
+
+[ControlWdf]
+HKLM,System\CurrentControlSet\Control\Wdf\Kmdf\KmdfLibrary\Versions\1,"Service",,"Wdf01000"
 
 [CurrentVersion]
 HKCU,%CurrentVersion%\Explorer\Advanced,,16
@@ -1292,6 +1300,12 @@ ServiceType=1
 StartType=2
 ErrorControl=1
 LoadOrderGroup="System Bus Extender"
+
+[KmdfService]
+ServiceBinary="%12%\wdf01000.sys"
+ServiceType=1
+StartType=3
+ErrorControl=1
 
 [RpcSsService]
 Description="RPC service"
