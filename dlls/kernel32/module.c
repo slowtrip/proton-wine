@@ -299,6 +299,41 @@ static BOOL int3_hack_enabled(void)
     return enabled;
 }
 
+static BOOL needs_int3_hack(void)
+{
+    static volatile int cache = -1;
+    
+    if (cache == -1)
+    {
+        const WCHAR *p, *name = NtCurrentTeb()->Peb->ProcessParameters->ImagePathName.Buffer;
+        WCHAR env[8];
+        BOOL ret;
+        
+        if ((p = wcsrchr(name, '/')))
+            name = p + 1;
+        if ((p = wcsrchr(name, '\\')))
+            name = p + 1;
+        
+        ret = ((!wcsicmp(name, L"Endfield.exe")) ||
+               (!wcsicmp(name, L"EM-Win64-Shipping.exe")));
+        
+        if (GetEnvironmentVariableW(L"PROTON_ENABLE_INT3_HACK", env, ARRAY_SIZE(env)))
+        {
+            if (_wtoi(env) == 1)
+                ret = TRUE;
+        }
+        
+        cache = ret;
+    }
+    
+    return cache;
+}
+
+static void __attribute__((naked)) int3_stub( void )
+{
+    asm(".byte 0xCC, 0xCC, 0xCC, 0xCC\n\t");
+}
+
 /***********************************************************************
  *           GetProcAddress   		(KERNEL32.@)
  *
@@ -324,6 +359,12 @@ FARPROC get_proc_address( HMODULE hModule, LPCSTR function )
 
         if ((strcmp( function, "KiUserApcDispatcher" ) == 0 || strcmp( function, "KiUserCallbackDispatcher" ) == 0)
                 && int3_hack_enabled())
+        {
+            FIXME( "HACK: returning int3 stub instead of %s\n", function );
+            return (FARPROC)&int3_stub;
+        }
+
+        if (needs_int3_hack() && (strcmp( function, "KiUserApcDispatcher" ) == 0 || strcmp( function, "KiUserCallbackDispatcher" ) == 0))
         {
             FIXME( "HACK: returning int3 stub instead of %s\n", function );
             return (FARPROC)&int3_stub;
