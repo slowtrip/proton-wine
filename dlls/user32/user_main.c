@@ -320,9 +320,15 @@ int WINAPI RegisterServicesProcess(DWORD ServicesProcessId)
  */
 BOOL WINAPI ShutdownBlockReasonCreate(HWND hwnd, LPCWSTR reason)
 {
-    FIXME("(%p, %s): stub\n", hwnd, debugstr_w(reason));
-    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
-    return FALSE;
+    TRACE("(%p, %s)\n", hwnd, debugstr_w(reason));
+
+    if (GetWindowThreadProcessId(hwnd, NULL) != GetCurrentThreadId())
+    {
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /***********************************************************************
@@ -330,9 +336,15 @@ BOOL WINAPI ShutdownBlockReasonCreate(HWND hwnd, LPCWSTR reason)
  */
 BOOL WINAPI ShutdownBlockReasonDestroy(HWND hwnd)
 {
-    FIXME("(%p): stub\n", hwnd);
-    SetLastError( ERROR_CALL_NOT_IMPLEMENTED );
-    return FALSE;
+    TRACE("(%p)\n", hwnd);
+
+    if (GetWindowThreadProcessId(hwnd, NULL) != GetCurrentThreadId())
+    {
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 const char *SPY_GetMsgName( UINT msg, HWND hwnd )
