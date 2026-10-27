@@ -470,6 +470,14 @@ struct luid_attr
     unsigned int attrs;
 };
 
+struct kernel_module_info
+{
+    client_ptr_t base;
+    mem_size_t   size;
+    data_size_t  name_len;
+
+};
+
 struct acl
 {
     unsigned char  revision;
@@ -5612,6 +5620,45 @@ struct set_kernel_object_ptr_reply
 };
 
 
+struct register_kernel_module_request
+{
+    struct request_header __header;
+    char __pad_12[4];
+    client_ptr_t base;
+    mem_size_t   size;
+    /* VARARG(name,unicode_str); */
+};
+struct register_kernel_module_reply
+{
+    struct reply_header __header;
+};
+
+
+struct unregister_kernel_module_request
+{
+    struct request_header __header;
+    char __pad_12[4];
+    client_ptr_t base;
+};
+struct unregister_kernel_module_reply
+{
+    struct reply_header __header;
+};
+
+
+struct list_kernel_modules_request
+{
+    struct request_header __header;
+    char __pad_12[4];
+};
+struct list_kernel_modules_reply
+{
+    struct reply_header __header;
+    unsigned int module_count;
+    data_size_t  info_size;
+    /* VARARG(info,kernel_module_info); */
+};
+
 
 struct grab_kernel_object_request
 {
@@ -5677,6 +5724,20 @@ struct grant_process_admin_token_request
     obj_handle_t handle;
 };
 struct grant_process_admin_token_reply
+{
+    struct reply_header __header;
+};
+
+
+
+struct set_process_session_request
+{
+    struct request_header __header;
+    obj_handle_t handle;
+    unsigned int session_id;
+    char __pad_20[4];
+};
+struct set_process_session_reply
 {
     struct reply_header __header;
 };
@@ -6803,11 +6864,15 @@ enum request
     REQ_get_next_device_request,
     REQ_get_kernel_object_ptr,
     REQ_set_kernel_object_ptr,
+    REQ_register_kernel_module,
+    REQ_unregister_kernel_module,
+    REQ_list_kernel_modules,
     REQ_grab_kernel_object,
     REQ_release_kernel_object,
     REQ_get_kernel_object_handle,
     REQ_make_process_system,
     REQ_grant_process_admin_token,
+    REQ_set_process_session,
     REQ_get_token_info,
     REQ_create_linked_token,
     REQ_create_completion,
@@ -7131,11 +7196,15 @@ union generic_request
     struct get_next_device_request_request get_next_device_request_request;
     struct get_kernel_object_ptr_request get_kernel_object_ptr_request;
     struct set_kernel_object_ptr_request set_kernel_object_ptr_request;
+    struct register_kernel_module_request register_kernel_module_request;
+    struct unregister_kernel_module_request unregister_kernel_module_request;
+    struct list_kernel_modules_request list_kernel_modules_request;
     struct grab_kernel_object_request grab_kernel_object_request;
     struct release_kernel_object_request release_kernel_object_request;
     struct get_kernel_object_handle_request get_kernel_object_handle_request;
     struct make_process_system_request make_process_system_request;
     struct grant_process_admin_token_request grant_process_admin_token_request;
+    struct set_process_session_request set_process_session_request;
     struct get_token_info_request get_token_info_request;
     struct create_linked_token_request create_linked_token_request;
     struct create_completion_request create_completion_request;
@@ -7457,11 +7526,15 @@ union generic_reply
     struct get_next_device_request_reply get_next_device_request_reply;
     struct get_kernel_object_ptr_reply get_kernel_object_ptr_reply;
     struct set_kernel_object_ptr_reply set_kernel_object_ptr_reply;
+    struct register_kernel_module_reply register_kernel_module_reply;
+    struct unregister_kernel_module_reply unregister_kernel_module_reply;
+    struct list_kernel_modules_reply list_kernel_modules_reply;
     struct grab_kernel_object_reply grab_kernel_object_reply;
     struct release_kernel_object_reply release_kernel_object_reply;
     struct get_kernel_object_handle_reply get_kernel_object_handle_reply;
     struct make_process_system_reply make_process_system_reply;
     struct grant_process_admin_token_reply grant_process_admin_token_reply;
+    struct set_process_session_reply set_process_session_reply;
     struct get_token_info_reply get_token_info_reply;
     struct create_linked_token_reply create_linked_token_reply;
     struct create_completion_reply create_completion_reply;
@@ -7516,6 +7589,6 @@ union generic_reply
     struct hwnd_dmabuf_release_channel_reply hwnd_dmabuf_release_channel_reply;
 };
 
-#define SERVER_PROTOCOL_VERSION 938
+#define SERVER_PROTOCOL_VERSION 939
 
 #endif /* __WINE_WINE_SERVER_PROTOCOL_H */
